@@ -6,10 +6,15 @@ from pprint import pprint
 import requests
 import dateutil.parser
 
-USERNAME = "email go here"
-PASSWORD = "password go here"
+########################################
+
+USERNAME = "PASTE USERNAME HERE"
+PASSWORD = "PASTE PASSWORD HERE"
+
+########################################
 
 class GOATAPI:
+
     def __init__(self, username, password):
         self.username = username
         self.password = password
@@ -83,7 +88,7 @@ class GOATAPI:
     def write_orders_to_csv(self):
         orders_written = []
         with open("invoices.csv", "w") as template:
-            fieldnames = ['*ContactName', 'EmailAddress', 'POAddressLine1', 'POAddressLine2', 'POAddressLine3', 'POAddressLine4', 'POCity', 'PORegion', 'POPostalCode', 'POCountry', '*InvoiceNumber', 'Reference', '*InvoiceDate', '*DueDate', 'Total', 'InventoryItemCode', '*Description', '*Quantity', '*UnitAmount', 'Discount', '*AccountCode', '*TaxType', 'TaxAmount', 'TrackingName1', 'TrackingOption1', 'TrackingName2', 'TrackingOption2', 'Currency', 'BrandingTheme']
+            fieldnames = ['*ContactName', 'EmailAddress', 'POAddressLine1', 'POAddressLine2', 'POAddressLine3', 'POAddressLine4', 'POCity', 'PORegion', 'POPostalCode', 'POCountry', '*InvoiceNumber', 'Reference', '*InvoiceDate', '*DueDate', 'Total', 'InventoryItemCode', '*SKU', '*Name', '*Size', '*Quantity', '*UnitAmount', 'Discount', '*AccountCode', '*TaxType', 'TaxAmount', 'TrackingName1', 'TrackingOption1', 'TrackingName2', 'TrackingOption2', 'Currency', 'BrandingTheme']
             out = csv.DictWriter(template, fieldnames)
             out.writeheader()
             for order in self.orders:
@@ -100,12 +105,9 @@ class GOATAPI:
                     "Currency": "USD"
                 }
                 line_item = {
-                    "*Description": "Sale #{0} of {1} - SKU: {2}".format(
-                        order['number'],
-                        order['product']['productTemplate']['name'],
-                        order['product']['productTemplate']['sku'],
-                    ),
-                    "*Quantity": "1",
+                    "*SKU": order['product']['productTemplate']['sku'],
+                    "*Name": order['product']['productTemplate']['name'],
+                    "*Size": order['product']['size'],
                     "*UnitAmount": str(order['product']['priceCents'] / 100),
                     "*AccountCode": "200",
                     "*TaxType": "Zero Rated Income"
@@ -120,7 +122,7 @@ class GOATAPI:
                 fee = {**fee, **meta}
                 line_item = {**line_item, **meta}
                 out.writerow(line_item)
-                out.writerow(fee)
+                #out.writerow(fee)
                 orders_written.append(order['number'])
         print("-----Orders exported-----")
         for order_number in orders_written:
